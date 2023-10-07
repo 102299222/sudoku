@@ -59,6 +59,80 @@
       </a>
 
       <!-- Unnamed (矩形) -->
+      <div id="u1724" class="ax_default button">
+       <img id="u1724_img" class="img " src="images/easy/u20.svg"/>
+        <div id="u1724_text" class="text ">
+        <p><span id="solveButton">解</span></p>
+        <script type="text/javascript">
+                        document.getElementById('solveButton').addEventListener('click', function() {
+                  const grids = document.querySelectorAll('.ax_default');
+                  grids.forEach(grid => {
+                      const cells = grid.querySelectorAll('.sudokucell');
+                      const solution = Array.from(cells, cell => cell.textContent.trim() === '' ? 0 : parseInt(cell.textContent, 10));
+                      if (solve(solution, 0)) {
+                          cells.forEach((cell, index) => {
+                              cell.textContent = solution[index];
+                          });
+                      } else {
+                          alert('无解');
+                      }
+                  });
+              });
+          
+              function solve(cells, index) {
+                  if (index === cells.length) {
+                      return true;
+                  }
+          
+                  if (cells[index] !== 0) {
+                      return solve(cells, index + 1);
+                  }
+          
+                  for (let num = 1; num <= 9; num++) {
+                      cells[index] = num;
+                      if (isValid(cells, index)) {
+                          if (solve(cells, index + 1)) {
+                              return true;
+                          }
+                      }
+                      cells[index] = 0;
+                  }
+                  return false;
+              }
+          
+              function isValid(cells, index) {
+                  const num = cells[index];
+                  const row = Math.floor(index / 9);
+                  const col = index % 9;
+                  const boxRow = Math.floor(row / 3) * 3;
+                  const boxCol = Math.floor(col / 3) * 3;
+          
+                  for (let i = 0; i < 9; i++) {
+                      if (cells[row * 9 + i] === num && i !== col) {
+                          return false;
+                      }
+                      if (cells[i * 9 + col] === num && i !== row) {
+                          return false;
+                      }
+                  }
+          
+                  for (let i = 0; i < 3; i++) {
+                      for (let j = 0; j < 3; j++) {
+                          const curRow = boxRow + i;
+                          const curCol = boxCol + j;
+                          if (cells[curRow * 9 + curCol] === num && (curRow !== row || curCol !== col)) {
+                              return false;
+                          }
+                      }
+                  }
+          
+                  return true;
+              }
+      </script>
+        </div>
+      </div>
+
+      <!-- Unnamed (矩形) -->
       <div id="u1744" class="ax_default button">
         <img id="u1744_img" class="img " src="images/easy/u40.svg"/>
         <div id="u1744_text" class="text ">
@@ -71,7 +145,7 @@
             </script>
         </div>
       </div>
-
+      
       <!-- Unnamed (表格) -->
       <div id="u1745" class="ax_default" style="z-index: 9998;"> 
         <div class="sudokugrid1"></div>
@@ -286,14 +360,12 @@
             for (let i = 0; i < 9; i++) {
                 B.push(grid[row][i]);
                 B.push(grid[i][col]);
-                B.push(grid[Math.floor(row / 3) * 3 + Math.floor(i / 3)][Math.floor(col / 3) * 3 + i % 3]);
+                
             }
-            for (let i=0;i<3;i++)
-            {
-              for (let j=0;j<3;j++)
-              {
-                B.push(grid[Math.floor(row / 3) * 3 +i][Math.floor(col / 3) * 3+j]);
-              }
+            for (let i=0;i<3;i++) {
+                for (let j=0;j<3;j++) {
+                    B.push(grid[Math.floor(row / 3) * 3 +i][Math.floor(col / 3) * 3+j]);
+                }
             }
             const C = A.filter(x => !B.includes(x));
             return C[Math.floor(Math.random() * C.length)];
@@ -305,7 +377,15 @@
                 for (let col = 0; col < 9; col++) {
                     let number;
                     number = getNumber(grid, row, col);
-                    grid[row][col] = number;
+                    if (number === undefined) {
+                    // 如果无法获取一个有效的数字，重置当前行，并从头开始
+                        for (let i = 0; i <= col; i++) {
+                            grid[row][i] = 0;
+                        }
+                        col = -1;
+                    } else {
+                        grid[row][col] = number;
+                    }
                 }
             }
         }
